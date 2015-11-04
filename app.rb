@@ -4,7 +4,12 @@ require './lib/hangperson_game.rb'
 
 class HangpersonApp < Sinatra::Base
 
+  # turn on the session[] hash that saves cookie/state data about
+  # the requests
   enable :sessions
+  
+  # flash[] remembers short messages that persist until the very next
+  # request
   register Sinatra::Flash
   
   before do
@@ -38,9 +43,23 @@ class HangpersonApp < Sinatra::Base
   # If a guess is repeated, set flash[:message] to "You have already used that letter."
   # If a guess is invalid, set flash[:message] to "Invalid guess."
   post '/guess' do
+    
+    # extract the first letter submitted on the form
     letter = params[:guess].to_s[0]
-    ### YOUR CODE HERE ###
-    redirect '/show'
+
+    # use the letter as a guess on the current game
+    if (!@game.guess(letter))
+      flash[:message] =  "You have already used that letter."
+    end
+    
+    case @game.check_win_or_lose
+      when :play then redirect '/show'
+      when :win then redirect '/win'
+      when :lose then redirect '/lose'
+    end
+    
+    # redirect to the show action
+    
   end
   
   # Everytime a guess is made, we should eventually end up at this route.
