@@ -47,18 +47,24 @@ class HangpersonApp < Sinatra::Base
     # extract the first letter submitted on the form
     letter = params[:guess].to_s[0]
 
-    # use the letter as a guess on the current game
-    if (!@game.guess(letter))
-      flash[:message] =  "You have already used that letter."
-    end
+    begin
     
-    case @game.check_win_or_lose
-      when :play then redirect '/show'
-      when :win then redirect '/win'
-      when :lose then redirect '/lose'
-    end
+      # use the letter as a guess on the current game
+      if (!@game.guess(letter))
+        flash[:message] =  "You have already used that letter."
+      end
+      
+      case @game.check_win_or_lose
+        when :play then redirect '/show'
+        when :win then redirect '/win'
+        when :lose then redirect '/lose'
+      end
     
     # redirect to the show action
+    rescue ArgumentError
+      flash[:message] = "Invalid guess."
+      redirect '/show'
+    end
     
   end
   
